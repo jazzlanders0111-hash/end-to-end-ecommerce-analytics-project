@@ -36,18 +36,18 @@ Each notebook validates its inputs before it touches them, and writes verified o
 ```
 NB01  ──►  enhanced_df.parquet  ──────────────────────────────────────┐
       └──►  rfm_df.parquet  ─────────────────────────────────────┐    │
-                                                                  │    │
-      NB02 (terminal) ◄────────────────────────────────── enhanced_df  │
-                                                                  │    │
-      NB03 ◄──────────────────────────────────── rfm_df + enhanced_df  │
+                                                                 │    │
+      NB02 (terminal) ◄────────────────────────────────── enhanced_df │
+                                                                 │    │
+      NB03 ◄──────────────────────────────────── rfm_df + enhanced_df │
            └──►  customer_segments.csv ──────────────────────┐        │
-                                                              │        │
+                                                             │        │
       NB04 ◄──────────────── enhanced_df + rfm_df + segments ┘        │
-           └──►  customer_risk_segments.csv ──────────────┐            │
-                                                          │            │
-      NB05 ◄──── enhanced_df + rfm_df + segments + risk ──┘            │
-                                                                        │
-      NB06 (terminal) ◄──────── enhanced_df + rfm_df + segments ◄──────┘
+           └──►  customer_risk_segments.csv ──────────────┐           │
+                                                          │           │
+      NB05 ◄──── enhanced_df + rfm_df + segments + risk ──┘           │
+                                                                      │
+      NB06 (terminal) ◄──────── enhanced_df + rfm_df + segments ◄─────┘
 ```
 
 ---
@@ -247,15 +247,14 @@ Three interventions emerge from the analysis with the clearest evidence base and
 ```
 ecommerce-analytics-project/
 ├── assets/
-│   ├── NB01_Features_Correlational_Heatmap.png
-│   ├── NB02_KPI.png
-│   ├── NB02_Executive_Dashboard.png
-│   ├── NB02_Time_Series_Forecast_Analysis.png
-│   ├── NB03_Choosing_Clusters.png
-│   ├── NB03_Comprehensive_Segment.png
-│   ├── NB03_RFM_Metrics.png
-│   ├── NB04_ROC_comparison.png
-│   └── NB06_Cohort_Heatmap.png
+│   ├── nb01_correlation_heatmap.png
+│   ├── nb02_forecast_analysis.png
+│   ├── nb03_cluster_selection.png
+│   ├── nb03_segment_comparison.png
+│   ├── nb04_roc_comparison.png
+│   ├── nb05_risk_tier_breakdown.png
+│   ├── nb05_segment_fraud_crosstab.png
+│   └── nb06_cohort_heatmap.png
 ├── data/
 │   ├── raw/
 │   │   └── ecommerce_sales_34500.csv
@@ -277,12 +276,12 @@ ecommerce-analytics-project/
 │   ├── feature_columns.txt               # 7 COMPOSITE feature names
 │   └── model_performance.json
 ├── notebooks/
-│   ├── 01_data_wrangling_exploration.ipynb
-│   ├── 02_sales_analysis.ipynb
+│   ├── 01_data_engineering_eda.ipynb
+│   ├── 02_sales_analysis_arima_forecasting.ipynb
 │   ├── 03_customer_segmentation.ipynb
 │   ├── 04_churn_prediction.ipynb
 │   ├── 05_fraud_detection.ipynb
-│   └── 06_cohort_retention_analysis.ipynb
+│   └── 06_cohort_retention_lifecycle.ipynb
 ├── outputs/
 │   └── figures/
 │       ├── notebook2_fig/    # 13 interactive HTML charts
