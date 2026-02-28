@@ -1,0 +1,7 @@
+recency_days
+loyalty_score
+tenure_days
+category_diversity
+last_order_was_return
+return_rate
+discount_usage_rate

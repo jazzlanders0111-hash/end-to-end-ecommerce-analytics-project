@@ -1,0 +1,90 @@
+# schema.yaml
+columns:
+  order_id:
+    type: string
+    nullable: false
+
+  customer_id:
+    type: string
+    nullable: false
+
+  product_id:
+    type: string
+    nullable: false
+
+  category:
+    type: string
+    nullable: false
+
+  price:
+    type: float32
+    nullable: false
+    checks:
+      - ge: 0
+
+  discount:
+    type: float32
+    nullable: false
+    checks:
+      - ge: 0
+
+  quantity:
+    type: int8
+    nullable: false
+    checks:
+      - ge: 1
+
+  payment_method:
+    type: string
+    nullable: false
+
+  order_date:
+    type: datetime
+    nullable: false
+    coerce: true
+
+  delivery_time_days:
+    type: int8
+    nullable: false
+    checks:
+      - ge: 0
+
+  region:
+    type: string
+    nullable: false
+
+  returned:
+    type: string
+    nullable: true
+
+  total_amount:
+    type: float32
+    nullable: false
+    checks:
+      - ge: 0
+
+  shipping_cost:
+    type: float32
+    nullable: false
+    checks:
+      - ge: 0
+
+  profit_margin:
+    type: float32
+    nullable: false
+    # no ge:0 because margins can be negative
+
+  customer_age:
+    type: int8
+    nullable: false
+    checks:
+      - ge: 18
+
+  customer_gender:
+    type: string
+    nullable: false
+
+# Optional global settings
+schema_settings:
+  strict: true          # fail if extra columns exist #use (filter) to ignore extra columns
+  coerce: false         # only coerce columns that have coerce: true

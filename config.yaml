@@ -1,0 +1,680 @@
+# ============================================================================
+# E-Commerce Analytics Project Configuration 
+# ============================================================================
+
+# ============================================================================
+# Global Settings
+# ============================================================================
+
+config_path: config.yaml  
+
+logging:
+  level: INFO
+  file: project.log
+
+paths:
+  raw_data: data/raw/ecommerce_sales_34500.csv
+  processed_data: data/processed/
+  interim_data: data/interim/
+  enhanced_df: data/processed/enhanced_df.parquet
+  rfm_df: data/processed/rfm_df.parquet
+  customer_segments: data/processed/customer_segments.csv
+  customer_risk_segments: data/processed/customer_risk_segments.csv
+  fraud_risk_profile: data/processed/fraud_risk_profile.parquet
+  fraud_risk_summary: data/processed/fraud_risk_summary.csv
+  model_performance: data/models/model_performance.json
+  figures_dir: outputs/figures
+  models_dir: models
+  notebook1_figures: outputs/figures/notebook1_fig
+  notebook2_figures: outputs/figures/notebook2_fig
+  notebook3_figures: outputs/figures/notebook3_fig
+  notebook4_figures: outputs/figures/notebook4_fig
+  notebook5_figures: outputs/figures/notebook5_fig
+  notebook6_figures: outputs/figures/notebook6_fig
+
+
+validation:
+  expected_row_count: 34500
+  expected_date_range:
+    start: "2023-09-12"
+    end: "2025-09-11"
+  expected_customers: 7903
+  expected_rfm_customers: 7877
+
+time_series:
+  complete_months_only: true
+  incomplete_month_cutoff: "2025-09-01"
+  reference_date: "2025-09-12"
+  extend_to_reference: true
+
+rfm:
+  as_of_date: null
+  winsor_limits: [0.02, 0.02]
+  cache_ttl_hours: 24
+  churn_threshold_days: 120       # Days of recency after which a customer is flagged churned
+  loyalty_weights:
+    recency: 0.3
+    frequency: 0.4
+    monetary: 0.3
+
+visualization:
+  style: 'seaborn-v0_8-whitegrid'
+  color_palette:
+    - '#1B1F5E'
+    - '#EA731D'
+    - '#2E7D32'
+    - '#F57C00'
+    - '#C62828'
+    - '#757575'
+  colors:
+    primary: '#1B1F5E'
+    secondary: '#EA731D'
+    success: '#2E7D32'
+    warning: '#F57C00'
+    danger: '#C62828'
+    neutral: '#757575'
+    gradient:
+      - '#1B1F5E'
+      - '#4A5FA8'
+      - '#EA731D'
+      - '#F59D5A'
+  figure_defaults:
+    height: 500
+    template: 'plotly_white'
+    hovermode: 'x unified'
+    font:
+      size: 12
+      family: 'Arial, sans-serif'
+  export:
+    png:
+      width: 1200
+      height: 600
+    formats:
+      - html
+    include_timestamp: true
+  categorical_palettes:
+    category: "Paired"
+    region: "tab10"
+    payment_method: "Set2"
+    customer_gender:
+      Male: "blue"
+      Female: "pink"
+      Unknown: "gray"
+      Other: "lightgray"
+
+# ============================================================================
+# NOTEBOOK 01: Data Wrangling & Exploration
+# ============================================================================
+notebook1:
+  random_state: 42
+  
+  data_loading:
+    chunksize: 100000
+    low_memory: true
+    encoding: 'utf-8'
+    error_bad_lines: false
+    warn_bad_lines: true
+    compression: 'infer'
+
+  display:
+    max_columns: null
+    max_rows: 100
+    float_format: '{:.2f}'
+    precision: 2
+  
+  eda:
+    transaction_cols:
+      - total_amount
+      - quantity
+      - discount
+      - shipping_cost
+    rfm_cols:
+      - recency_days
+      - frequency
+      - monetary
+      - loyalty_score
+    categorical_cols:
+      - category
+      - region
+      - payment_method
+      - customer_gender
+  
+  outlier:
+    method: IQR
+    iqr_multiplier: 1.5
+    high_outlier_pct_threshold: 5.0
+  
+  statistical_tests:
+    normality_sample_size: 5000
+    normality_alpha: 0.05
+    correlation_threshold: 0.5
+    chi_square_alpha: 0.05
+  
+  business_rules:
+    max_acceptable_data_loss_pct: 5.0
+    churn_benchmark_critical: 60.0
+    churn_benchmark_elevated: 40.0
+    return_rate_healthy_max: 10.0
+    return_rate_above_avg_max: 15.0
+    revenue_concentration_high: 40.0
+    revenue_concentration_moderate: 25.0
+    mean_median_ratio_threshold: 1.5
+    top20_concentration_high: 70.0
+    one_time_buyer_threshold: 40.0
+  
+  loyalty_segments:
+    labels:
+      - Bronze
+      - Silver
+      - Gold
+      - Platinum
+  
+  cleaning:
+    auto_fix_negatives: true
+    imputation_strategy:
+      numeric: 'median'
+      categorical: 'mode'
+    unknown_value: 'Unknown'
+    empty_values: ['', 'Nan', 'None', 'nan', 'null', 'NULL']
+  
+  missing_data:
+    critical_threshold_pct: 50.0
+    low_threshold_pct: 5.0
+    alpha: 0.05
+  
+  quality_score:
+    completeness_weight: 40.0
+    compliance_weight: 30.0
+    retention_weight: 30.0
+    thresholds:
+      excellent: 90.0
+      good: 75.0
+      fair: 60.0
+  
+  enhanced_analysis:
+    churn_threshold_days: 120
+    loyal_customer_min_orders: 5
+    super_loyal_min_orders: 10
+    at_risk_threshold_multiplier: 0.75
+  
+  compression:
+    type: 'snappy'
+    index: false
+  
+  expected_dtypes:
+    order_id: 'object'
+    customer_id: 'object'
+    product_id: 'object'
+    category: 'object'
+    payment_method: 'object'
+    region: 'object'
+    customer_gender: 'object'
+    price: ['float64', 'float32']
+    discount: ['float64', 'float32']
+    quantity: ['int64', 'int32', 'int16', 'int8']
+    total_amount: ['float64', 'float32']
+    shipping_cost: ['float64', 'float32']
+    profit_margin: ['float64', 'float32']
+    customer_age: ['int64', 'int32', 'int16', 'int8']
+    delivery_time_days: ['int64', 'int32', 'int16', 'int8']
+    returned: ['int64', 'int32', 'int16', 'int8']
+    order_date: 'datetime64[ns]'
+
+# ============================================================================
+# NOTEBOOK 02: Multi-Dimensional Analysis & Forecasting
+# ============================================================================
+notebook2:
+  random_state: 42
+  display:
+    max_columns: null
+    max_rows: 100
+    float_format: '{:.2f}'
+    precision: 2
+  data_validation:
+    expected_hash: '819fa403'
+    required_columns:
+      - order_id
+      - customer_id
+      - product_id
+      - category
+      - price
+      - discount
+      - quantity
+      - payment_method
+      - order_date
+      - delivery_time_days
+      - region
+      - returned
+      - total_amount
+      - profit_margin
+  time_trends:
+    incomplete_month_threshold_days: 28
+    yoy_periods: 12
+    min_months_for_yoy: 13
+    colors:
+      - "#1B1F5E"
+      - "#EA731D"
+      - "#A647AE"
+      - "#F34940"
+      - "#50DC50"
+      - "#2B3351"
+      - "#FBC500"
+      - "#1B1F5E"
+      - "#EA731D"
+      - "#A647AE"
+      - "#F34940"
+      - "#50DC50"
+      - "#2B3351"
+      - "#FBC500"
+  category_analysis:
+    top_n_products: 20
+    colors:
+      - "#AECCDB"
+      - "#3274A1"
+      - "#B3D495"
+      - "#33a02c"
+      - "#fb9a99"
+      - "#e31a1c"
+      - "#fdbf6f"
+      - "#ff7f00"
+      - "#cab2d6"
+      - "#6a3d9a"
+      - "#ffff99"
+      - "#b15928"
+  region_payment:
+    region_colors:
+      - "#4231B1"
+      - "#3B9E3B"
+      - "#E4C743"
+      - "#d29b41"
+      - "#d83634"
+      - "#9f3dc9"
+      - "#40b9d4"
+      - "#bf7c39"
+    payment_colors:
+      - "#1D2ADC"
+      - "#EA731D"
+      - "#33a02c"
+      - "#e31a1c"
+      - "#9f3dc9"
+      - "#40b9d4"
+      - "#bf7c39"
+  discount_analysis:
+    colors:
+      - "#2E7D32"
+      - "#7CB342"
+      - "#FDD835"
+      - "#FB8C00"
+      - "#F4511E"
+      - "#C62828"
+    discount_levels:
+      0: '0%'
+      5: '5%'
+      10: '10%'
+      15: '15%'
+      20: '20%'
+      30: '30%'
+    discount_order:
+      - '0%'
+      - '5%'
+      - '10%'
+      - '15%'
+      - '20%'
+      - '30%'
+  forecasting:
+    train_ratio: 0.8
+    arima_configs:
+      - [1, 1, 1]
+      - [2, 1, 1]
+      - [1, 1, 2]
+      - [2, 1, 2]
+      - [0, 1, 1]
+      - [1, 1, 0]
+    revenue_growth_weeks: 13
+    mape_thresholds:
+      excellent: 10.0
+      good: 20.0
+  summary_dashboard:
+    combined_dashboard:
+      rows: 2
+      cols: 2
+      max_figures: 4
+    priority_sections:
+      - time_trends
+      - category
+      - region_payment
+      - discount
+      - forecasting
+    figures_per_section: 1
+
+# ============================================================================
+# NOTEBOOK 03: Customer Segmentation
+# ============================================================================
+notebook3:
+  random_state: 42
+  display:
+    max_columns: null
+    max_rows: 100
+    float_format: '{:.2f}'
+    precision: 2
+  score_bins: 5
+  clustering:
+    k_range: [2, 3, 4, 5, 6, 7, 8]
+    min_k: 3
+    max_k: 8
+    fallback_k: 4
+    kmeans:
+      n_init: 50
+      max_iter: 300
+      random_state: 42
+      algorithm: 'lloyd'
+    stability:
+      n_iterations: 50
+      sample_fraction: 0.8
+    quality_thresholds:
+      silhouette:
+        excellent: 0.9
+        good: 0.8
+        moderate: 0.7
+      separation:
+        excellent: 0.5
+        good: 0.3
+        fair: 0.1
+  feature_prep:
+    scaler_type: 'standard'
+    skewness_threshold: 1.0
+    outlier_z_threshold: 3.0
+  rfm_analyzer:
+    default_features:
+      - recency_days
+      - frequency
+      - monetary
+      - avg_order_value
+      - loyalty_score
+  visualizations:
+    pca:
+      n_components: 2
+      random_state: 42
+    top_n_features: 10
+  churn_risk:
+    enabled: true
+    thresholds:
+      active: 60
+      at_risk: 120
+      inactive: 180
+      churned: 180
+    labels:
+      - Active
+      - At Risk
+      - Inactive
+      - Churned
+
+# ============================================================================
+# NOTEBOOK 04: Churn Prediction — Time-Based Methodology
+# ============================================================================
+notebook4:
+
+  # ── Flat aliases ────────────────────────────────────────────────────────────
+  # Read directly by n4a_utils.validate_config() and n4b_time_split.
+  observation_window_days: 180
+  test_size: 0.2
+  random_state: 42
+
+  display:
+    max_columns: null
+    max_rows: 100
+    float_format: '{:.2f}'
+    precision: 2
+
+  # ── Churn label definition ──────────────────────────────────────────────────
+  churn:
+    cutoff_date: null            # null → auto: max_date − observation_window_days
+    feature_lookback: 365        # Days before cutoff used to compute behavioral features
+    min_orders: 1                # Minimum pre-cutoff orders to include a customer
+
+  # ── Model training ──────────────────────────────────────────────────────────
+  training:
+    logistic_regression:
+      max_iter: 1000
+      random_state: 42
+      class_weight: 'balanced'
+      solver: 'lbfgs'
+
+    random_forest:
+      n_estimators: 200
+      max_depth: 15
+      min_samples_split: 10
+      min_samples_leaf: 5
+      random_state: 42
+      class_weight: 'balanced'
+      n_jobs: -1
+
+    xgboost:
+      n_estimators: 200
+      max_depth: 6
+      learning_rate: 0.1
+      subsample: 0.8
+      colsample_bytree: 0.8
+      random_state: 42
+
+  # ── Evaluation ──────────────────────────────────────────────────────────────
+  # Thresholds are intentionally strict — they gate production readiness.
+  evaluation:
+    primary_metric: 'f1'
+    thresholds:
+      min_accuracy:  0.75
+      min_precision: 0.70
+      min_recall:    0.70
+      min_f1:        0.70
+      min_roc_auc:   0.80
+
+  # ── Feature importance ──────────────────────────────────────────────────────
+  feature_importance:
+    top_n_features: 20
+    cumulative_thresholds: [50, 80, 95]
+
+  # ── Feature engineering ─────────────────────────────────────────────────────
+  feature_engineering:
+    # Initial default strategy. Overridden at runtime by VIF analysis:
+    # strategies are defined in strategy_map in the notebook — whichever
+    # passes VIF with the highest F1 is selected programmatically.
+    strategy: 'base'
+
+    vif_threshold: 5.0
+    imputation_strategy: 'median'
+    scaling_method: 'standard'
+
+  # ── Risk stratification ─────────────────────────────────────────────────────
+  risk_stratification:
+    method: 'quantile'           # 'quantile' | 'threshold'
+    quantiles:
+      low:  0.33
+      high: 0.67
+    thresholds:
+      low:  0.30
+      high: 0.70
+    risk_levels:
+      - 'Low'
+      - 'Medium'
+      - 'High'
+
+  # ── Business insights ───────────────────────────────────────────────────────
+  business_insights:
+    top_n_drivers: 3
+    campaigns:
+      high_risk:
+        discount_pct:      30
+        response_target:   0.15
+        retention_target:  0.30
+      medium_risk:
+        discount_pct:      15
+        response_target:   0.25
+        retention_target:  0.50
+      low_risk:
+        discount_pct:      10
+        response_target:   0.20
+        retention_target:  0.85
+    roi:
+      campaign_cost_pct:          0.10
+      expected_retention_high:    0.30
+      expected_retention_medium:  0.50
+      expected_retention_low:     0.85
+
+# ============================================================================
+# NOTEBOOK 05: Fraud Detection & Anomaly Analysis
+# ============================================================================
+notebook5:
+  random_state: 42
+
+  display:
+    max_columns: null
+    max_rows: 100
+    float_format: '{:.4f}'
+    precision: 4
+
+  features:
+    - return_rate
+    - high_discount_return_rate
+    - discount_usage_rate
+    - max_discount_rate
+    - always_max_discount
+    - negative_margin_rate
+    - max_orders_7d
+    - velocity_burst_flag
+    - gap_cv
+    - high_value_rate_p95
+    - high_value_rate_p99
+    - category_hhi
+    - order_value_cv
+    - aov_zscore
+    - n_payment_methods
+    - payment_concentration
+
+  fraud:
+    rule_thresholds:
+      return_rate_high: 0.20
+      discount_rate_high: 0.80
+      velocity_order_count: 3.0
+      negative_margin_rate_high: 0.50
+      high_value_p99_rate: 0.20
+      category_hhi_threshold: 0.90
+
+    scoring:
+      weights:
+        return_abuse: 0.20
+        discount_exploitation: 0.15
+        high_discount_returns: 0.20
+        velocity_anomaly: 0.15
+        margin_exploitation: 0.15
+        order_value_anomaly: 0.10
+        category_concentration: 0.05
+      blend_weights:
+        rule_score: 0.40
+        iso_score: 0.30
+        lof_score: 0.30
+
+  models:
+    isolation_forest:
+      contamination: 0.05
+      n_estimators: 200
+      random_state: 42
+    lof:
+      n_neighbors: 20
+      contamination: 0.05
+
+  risk_tiers:
+    critical_threshold: 0.80
+    high_threshold: 0.60
+    medium_threshold: 0.35
+
+  validation:
+    max_high_critical_pct: 15.0
+
+  # NOTE: interventions block is currently unused by n5g_insights.py.
+  # build_intervention_recommendations() reads this key but the variable
+  # is never referenced — action strings and SLA hours are hardcoded.
+  # Kept here for future refactoring; a dev pass should wire these values in.
+  interventions:
+    critical:
+      action: "Immediate account review and manual verification"
+      review_sla_hours: 24
+    high:
+      action: "Priority review queue — resolve within 72 hours"
+      review_sla_hours: 72
+    medium:
+      action: "Enhanced monitoring — silent flags on next high-value order"
+      review_sla_hours: 168
+
+# ============================================================================
+# Environment-Specific Overrides
+# ============================================================================
+development:
+  environment: development
+
+production:
+  environment: production
+  rfm:
+    cache_ttl_hours: 12
+  notebook4:
+    # NB03 segment evidence: Lost Customers mean recency=415d (94.3% churned),
+    # High-Value at Risk mean recency=153d (32.3% churned).
+    # The behavioural boundary between at-risk and lost falls at ~120-180d.
+    # Production uses the same 180-day window for consistency with development.
+    observation_window_days: 180
+# ============================================================================
+# NOTEBOOK 06: Cohort Retention & Lifecycle Analysis
+# ============================================================================
+notebook6:
+  random_state: 42
+
+  display:
+    max_columns: null
+    max_rows: 100
+    float_format: '{:,.4f}'
+    precision: 4
+
+  business_rules:
+    min_cohort_size: 30
+    healthy_retention_month1: 0.25     # M+1 retention benchmark — below this flags a problem
+    critical_dropout_pct: 0.70         # M+1 dropout threshold that triggers a WARNING
+    ltv_window_months: 12              # Primary LTV window used in benchmarks and projections
+
+  statistical_tests:
+    outlier_z_threshold: 1.5           # |z-score| threshold for flagging outlier cohorts
+    spearman_threshold: 0.3            # |rho| threshold for meaningful AOV trend direction
+    alpha: 0.05                        # Significance level for all hypothesis tests
+
+  ltv:
+    benchmark_windows: [1, 3, 6, 12]       # Windows (months) passed to compute_ltv_benchmarks()
+    segment_windows: [3, 6, 12]            # Windows used for loyalty-tier segment LTV summary
+    nb03_segment_windows: [1, 3, 6, 12]   # Windows used for NB03 cluster segment LTV summary
+
+  scenarios:
+    improvement_increments: [0.05, 0.10, 0.15]  # Retention lift scenarios to model (pp)
+    periods: [1, 3]                              # Period offsets to compute uplift at
+
+  nb03_segments:
+    order:
+      - 'Loyal Customers'
+      - 'High-Value at Risk'
+      - 'Needs Engagement'
+      - 'Lost Customers'
+    comparison_periods: 9   # Number of leading periods to show in the HVAR vs Loyal table
+
+  # ── Segment colour palettes ─────────────────────────────────────────────────
+  # Used by plot_retention_by_segment() in n6f_segment_retention.py.
+  # Fix: two near-identical yellow/amber tones were previously rendered for
+  # Gold and a second series because no explicit mapping existed — the function
+  # fell back to the global COLORS cycling, which repeats #F57C00 / #EA731D.
+  segment_colors:
+    loyalty_tiers:
+      Bronze:   '#CD7F32'   # warm copper-brown  — visually "bronze"
+      Silver:   '#757575'   # neutral mid-grey   — visually "silver"
+      Gold:     '#F59D5A'   # warm amber/saffron  — distinct from orange
+      Platinum: '#1B1F5E'   # deep navy           — premium / primary brand
+    nb03_segments:
+      Loyal Customers:    '#2E7D32'   # forest green  — positive / healthy
+      High-Value at Risk: '#F57C00'   # warning amber — caution
+      Needs Engagement:   '#1395F8'   # clear blue    — actionable
+      Lost Customers:     '#C62828'   # danger red    — urgent
+    first_category: null   # null → cycle through viz.color_palette
