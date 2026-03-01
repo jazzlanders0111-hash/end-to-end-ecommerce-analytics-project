@@ -110,7 +110,7 @@ Bootstrap stability testing — running the clustering 50 times on random 80% su
 *Four independent metrics tested across k=2–8. k=4 wins 3 of 4 votes (Davies-Bouldin, Calinski-Harabasz, Elbow). Silhouette's preference for k=3 was overridden — at k=3, the High-Value at Risk segment is absorbed into a larger group, erasing the most commercially significant signal in the dataset.*
 
 ![Comprehensive Segment Comparison](assets/nb03_segment_comparison.png)
-*The asymmetry is the story: High-Value at Risk is 6% of customers but generates revenue on par with Loyal Customers (28%). Their average order value of ~$600 is 4–5× every other segment.*
+*The key point is the imbalance: High-Value at Risk customers make up only 6.1% of all customers, but they bring in 24.7% of total revenue. That’s almost as much as Loyal Customers, who make up 28% of customers — even though the High-Value group is much smaller. On average, they spend $707 per order, which is 4–6 times more than customers in other segments.*
 
 ---
 
